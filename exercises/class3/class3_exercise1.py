@@ -15,4 +15,4 @@ stu = ['101','张三','软件1801',[80,89,65]]
 print(f'学号:{stu[0]},姓名:{stu[1]}')
 print('成绩为:')
 for i in stu[3]:
-    print(i)
+    print(i,end=' ')
