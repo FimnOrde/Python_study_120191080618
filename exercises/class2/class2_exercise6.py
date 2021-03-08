@@ -19,6 +19,6 @@ if __name__ == "__main__":
 
     print(f'电影:{movie}')
     print(f'人数:{count}')
-    print(f'单价:{ticket}')
+    print('单价:%.6f'%ticket)
     print(f'总票价:{total}')
 
