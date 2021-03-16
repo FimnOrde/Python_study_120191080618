@@ -28,8 +28,7 @@ for i in odd:
 print('\n')
 
 # 判断是否为质数
-lis1.append(1)
-for i in range(3, 51):
+for i in range(2, 51):
     for j in range(2, i):
         if i % j == 0:
             break
