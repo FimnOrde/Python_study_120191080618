@@ -1,0 +1,11 @@
+学号      姓名      成绩
+ 01      TOM      96
+ 02      BOB      87
+ 03      JESS     74
+ 04      HELLEN   63
+ 05      MARY     91
+ 06      CLAN     84
+ 07      KHAN     81
+ 08      SWIT     79
+ 09      ALLY     68
+ 10      STARR    92
