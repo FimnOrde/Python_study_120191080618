@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <title>python接口测试</title>
+   <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+</head>
+<body>
+   <div id="test"></div>
+<div align="right">
+          <form method="POST" class="textcenter" >
+          <input type="text" name='search' placeholder="search">
+             <input type="submit" value="查询">
+
+          <input type="content" name="type" placeholder="type">
+          <input type="reset" value="添加">
+          </form>
+      <br>
+  </div>
+</body>
+</html>
+<script type="text/JavaScript">
+
+   $(document).ready(function() {
+   $.ajax({
+      url : "http://127.0.0.1:5000/get",//后台请求的数据
+      dataType : "json",//数据格式
+      type : "get",//请求方式
+      async : false,//是否异步请求
+      success : function(data){//如果请求成功，返回数据。
+         var html = "";
+
+         for(var i=0;i<data.length;i++){//遍历data数组
+            var ls = data[i];
+            html +="<span>#"+ls.num+"</span>&nbsp;&nbsp;&nbsp;"
+            html +="<span>Title:"+ls.content+"</span>&nbsp;&nbsp;&nbsp;";
+
+
+
+					html += '<input type="button" id="mes_del_sub" value="Undo" class="btn-primary"></td></tr>';
+                                  html += '<input type="button" id="mes_del_sub" value="Edit" class="btn-primary"></td></tr>';
+                                  html += '<input type="button" id="mes_del_sub" value="Remove" class="btn-primary"></td></tr>';
+                                  html +="<hr style=\" height:2px;border:none;border-top:2px dotted #185598;\" />"
+         }
+         $("#test").html(html); //在html页面id=test的标签里显示html内容
+      },
+    })
+})
+
+</script>

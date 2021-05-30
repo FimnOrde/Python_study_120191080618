@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}首页{% endblock %}
+
+{% block page_content %}
+    <table class="table table-bordered">
+    <tr>
+        <th>#</th>
+        <th>Title</th>
+        <th>State</th>
+
+        
+    </tr>
+        {% for i in u %}
+            <tr>
+                <td>{{ i[0] }}</td>
+                <td>{{ i[1] }}</td>
+                <td>{{ i[3] }}</td>
+
+
+            </tr>
+    {% endfor %}
+    </table>
+
+
+ <form method="POST">
+        <input type="text" name="username" placeholder="search for..">
+     <input type="submit" value="Go!">
+        <input type="text" name="password" placeholder="type something here">
+        <input type="submit" value="Add New Item">
+     <br/>
+     <input type="text" name="1" placeholder="Input the Num">
+                    <input type="submit" value="Done/Undo" >
+      <br/>
+                    <input type="text" name="2" placeholder="Input the Num">
+     <input type="text" name="21" placeholder="Input the Modified Text">
+                 <input type="submit" value="Edit" >
+      <br/>
+                    <input type="text" name="3" placeholder="Input the Num">
+                 <input type="submit" value="Remove">
+    </form>
+
+
+ <script >
+            function dd() {
+
+
+            }
+        </script>
+
+
+{% endblock %}

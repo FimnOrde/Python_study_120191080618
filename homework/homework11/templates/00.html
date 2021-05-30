@@ -1,0 +1,45 @@
+
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+    <script type="text/javascript">
+        function loadXMLDoc(str)
+        {
+            var xmlhttp;
+            if (str.length == 0)
+            {
+                document.getElementById("txtHint").innerHTML = "";
+                return;
+            }
+            if (window.XMLHttpRequest)
+            {
+                xmlhttp = new XMLHttpRequest();
+            }
+            else
+            {
+                xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+            }
+            xmlhttp.open("GET", "WebForm1.aspx?q="+str , true);
+            xmlhttp.send();
+            xmlhttp.onreadystatechange = callback;
+
+            function callback()
+            {
+                if (xmlhttp.readyState == 4 && xmlhttp.status == 200)
+                {
+                    document.getElementById("txtHint").innerHTML = xmlhttp.responseText;
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+    <form name="form1">
+        <h3>请在输入框中输入字母(A-G)：</h3>
+        <input id="Text1" name="Text1" type="text" onkeyup="loadXMLDoc(this.value)" />
+        <br />
+
+        提示： <div id="txtHint"></div>
+    </form>
+
+
