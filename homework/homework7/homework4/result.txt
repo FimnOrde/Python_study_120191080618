@@ -1,0 +1,655 @@
+Example 1
+
+def retrieve_top_tor_exit_ips(limit=CLOUDFLARE_ACCESS_RULE_LIMIT):
+    """
+    Retrieve exit information from Onionoo sorted by consensus weight
+    """
+    exits = {}
+    params = {
+        'running': True,
+        'flag': 'Exit',
+        'fields': 'or_addresses,exit_probability',
+        'order': '-consensus_weight',
+        'limit': limit
+    }
+    r = requests.get("https://onionoo.torproject.org/details", params=params)
+    r.raise_for_status()
+    res = r.json()
+    for relay in res.get('relays'):
+        or_address = relay.get('or_addresses')[0].split(':')[0]
+        exit_probability = relay.get('exit_probability', 0.0)
+        # Try calculate combined weight for all relays on each IP
+        exits[or_address] = exits.get(or_address, 0.0) + exit_probability
+    return sorted(exits, key=exits.get, reverse=True)
+****************************************************************************************************
+Example 2
+
+def getTicket():
+    # put the ip address or dns of your apic-em controller in this url
+    url = "https://" + controller + "/api/v1/ticket"
+
+    #the username and password to access the APIC-EM Controller
+    payload = {"username":"usernae","password":"password"}
+
+    #Content type must be included in the header
+    header = {"content-type": "application/json"}
+
+    #Performs a POST on the specified url to get the service ticket
+    response= requests.post(url,data=json.dumps(payload), headers=header, verify=False)
+
+    #convert response to json format
+    r_json=response.json()
+
+    #parse the json to get the service ticket
+    ticket = r_json["response"]["serviceTicket"]
+
+    return ticket
+****************************************************************************************************
+Example 3
+
+def fetch_image(self, session, relative, image_url):
+        fname = self.file_api.get_file_name(image_url)
+        p = os.path.join(relative, fname)
+        fetched = False
+        try:
+            with aiohttp.Timeout(self.timeout):
+                async with session.get(image_url) as r:
+                    if r.status == 200 and self.file_api.get_file_name(r.url) == fname:
+                        c = await r.read()
+                        if c:
+                            with open(self.file_api.to_abs(p), "wb") as f:
+                                f.write(c)
+                                fetched = True
+        except FileNotFoundError as ex:
+            self.logger.error("{0} is not found.".format(p))
+        except concurrent.futures._base.TimeoutError as tx:
+            self.logger.warning("{0} is timeouted.".format(image_url))
+        except Exception as ex:
+            self.logger.warning("fetch image is failed. url: {0}, cause: {1}".format(image_url, str(ex)))
+        return fetched
+****************************************************************************************************
+Example 4
+
+def fetch_access_rules(session, page_num=1, zone_id=None, per_page=50):
+    """
+    Fetch current access rules from the CloudFlare API
+    """
+
+    # If zone_id, only apply rule to current zone/domain
+    params = {'page': page_num, 'per_page': per_page}
+    if zone_id:
+        r = session.get('https://api.cloudflare.com/client/v4/zones/{}'
+                        '/firewall/access_rules/rules'.format(
+                            zone_id), params=params)
+    else:
+        r = session.get('https://api.cloudflare.com/client/v4/user'
+                        '/firewall/access_rules/rules', params=params)
+    r.raise_for_status()
+    res = r.json()
+    if not res['success']:
+        raise CloudFlareAPIError(res['errors'])
+    else:
+        return res
+****************************************************************************************************
+Example 5
+
+def downloadWithProgress(link, outpath):
+    print("Downloading %s" % link)
+    response = requests.get(link, stream=True)
+    total_length = response.headers.get('content-length')
+
+    with open(outpath, "wb") as outf:
+        sys.stdout.write("\rDownload progress: [{}]".format(' '*50))
+        sys.stdout.flush()
+
+        if total_length is None: # no content length header
+            outf.write(response.content)
+        else:
+            dl = 0
+            total_length = int(total_length)
+            for data in response.iter_content(chunk_size=1024):
+                dl += len(data)
+                outf.write(data)
+                done = int(50 * dl / total_length)
+                sys.stdout.write("\rDownload progress: [{}{}]".format('='*done, ' '*(50-done)))
+                sys.stdout.flush()
+    sys.stdout.write("\n")
+    outf.close()
+****************************************************************************************************
+Example 6
+
+def __init__(self, url, method='get', data=None, params=None,
+                 headers=None, content_type='application/json', **kwargs):
+        self.url = url
+        self.method = method
+        self.params = params or {}
+        self.kwargs = kwargs
+
+        if not isinstance(headers, dict):
+            headers = {}
+        self.headers = CaseInsensitiveDict(headers)
+        if content_type:
+            self.headers['Content-Type'] = content_type
+        if data:
+            self.data = json.dumps(data)
+        else:
+            self.data = {}
+****************************************************************************************************
+Example 7
+
+def Request(self, headers=None, path=None, params={}, delay=0, timeout=7):
+        try:
+            time.sleep(delay)
+            if not headers: 
+                h = self.headers
+            else: h = headers
+            req = requests.get(self.target, proxies=self.proxies, headers=h, timeout=timeout,
+                    allow_redirects=self.allowredir, params=params, verify=False)
+            self.log.info('Request Succeeded')
+            self.log.debug('Headers: %s\n' % req.headers)
+            self.log.debug('Content: %s\n' % req.content)
+            self.requestnumber += 1
+            return req
+        except requests.exceptions.RequestException as e:
+            self.log.error('Something went wrong %s' % (e.__str__()))
+****************************************************************************************************
+Example 8
+
+def read(uri):
+    """Abstract read function.
+
+    EDeN can accept a URL, a file path and a python list.
+    In all cases an iterable object should be returned.
+    """
+    if isinstance(uri, list):
+        # test if it is iterable: works for lists and generators, but not for
+        # strings
+        return uri
+    else:
+        try:
+            # try if it is a URL and if we can open it
+            f = requests.get(uri).text.split('\n')
+        except ValueError:
+            # assume it is a file object
+            f = open(uri)
+        return f
+****************************************************************************************************
+Example 9
+
+def resolve_reference_http(cls, design_uri):
+        """Retrieve design documents from http/https endpoints.
+
+        Return a byte array of the response content. Support unsecured or
+        basic auth
+
+        :param design_uri: Tuple as returned by urllib.parse for the design reference
+        """
+        if design_uri.username is not None and design_uri.password is not None:
+            response = requests.get(
+                design_uri.geturl(),
+                auth=(design_uri.username, design_uri.password),
+                timeout=get_client_timeouts())
+        else:
+            response = requests.get(
+                design_uri.geturl(), timeout=get_client_timeouts())
+
+        return response.content
+****************************************************************************************************
+Example 10
+
+def resolve_reference_ucp(cls, design_uri):
+        """Retrieve artifacts from a Airship service endpoint.
+
+        Return a byte array of the response content. Assumes Keystone
+        authentication required.
+
+        :param design_uri: Tuple as returned by urllib.parse for the design reference
+        """
+        ks_sess = KeystoneUtils.get_session()
+        (new_scheme, foo) = re.subn(r'^[^+]+\+', '', design_uri.scheme)
+        url = urllib.parse.urlunparse(
+            (new_scheme, design_uri.netloc, design_uri.path, design_uri.params,
+             design_uri.query, design_uri.fragment))
+        LOG.debug("Calling Keystone session for url %s" % str(url))
+        resp = ks_sess.get(url, timeout=get_client_timeouts())
+        if resp.status_code >= 400:
+            raise errors.InvalidDesignReference(
+                "Received error code for reference %s: %s - %s" %
+                (url, str(resp.status_code), resp.text))
+        return resp.content
+****************************************************************************************************
+Example 11
+
+def ensure_security_group(name, vpc, tcp_ingress=frozenset()):
+    try:
+        security_group = resolve_security_group(name, vpc)
+    except (ClientError, KeyError):
+        logger.info("Creating security group %s for %s", name, vpc)
+        security_group = vpc.create_security_group(GroupName=name, Description=name)
+        for i in range(90):
+            try:
+                clients.ec2.describe_security_groups(GroupIds=[security_group.id])
+            except ClientError:
+                time.sleep(1)
+    for rule in tcp_ingress:
+        source_security_group_id = None
+        if "source_security_group_name" in rule:
+            source_security_group_id = resolve_security_group(rule["source_security_group_name"], vpc).id
+        ensure_ingress_rule(security_group, IpProtocol="tcp", FromPort=rule["port"], ToPort=rule["port"],
+                            CidrIp=rule.get("cidr"), SourceSecurityGroupId=source_security_group_id)
+    return security_group
+****************************************************************************************************
+Example 12
+
+def contains(self, principal, action, effect, resource):
+        for statement in self.policy["Statement"]:
+            if "Condition" in statement or "NotAction" in statement or "NotResource" in statement:
+                continue
+
+            if statement.get("Principal") != principal or statement.get("Effect") != effect:
+                continue
+
+            if isinstance(statement.get("Action"), list):
+                actions = set(action) if isinstance(action, list) else set([action])
+                if not actions.issubset(statement["Action"]):
+                    continue
+            elif action != statement.get("Action"):
+                continue
+
+            if isinstance(statement.get("Resource"), list):
+                resources = set(resource) if isinstance(resource, list) else set([resource])
+                if not resources.issubset(statement["Resource"]):
+                    continue
+            elif resource != statement.get("Resource"):
+                continue
+
+            return True
+****************************************************************************************************
+Example 13
+
+def get_metadata(path):
+    res = requests.get("http://169.254.169.254/latest/meta-data/{}".format(path))
+    res.raise_for_status()
+    return res.content.decode()
+****************************************************************************************************
+Example 14
+
+def getNetworkDevices(ticket):
+    # URL for network device REST API call to get list of existing devices on the network.
+    url = "https://" + controller + "/api/v1/network-device"
+
+    #Content type must be included in the header as well as the ticket
+    header = {"content-type": "application/json", "X-Auth-Token":ticket}
+
+    # this statement performs a GET on the specified network-device url
+    response = requests.get(url, headers=header, verify=False)
+
+    # json.dumps serializes the json into a string and allows us to
+    # print the response in a 'pretty' format with indentation etc.
+    print ("Network Devices = ")
+    print (json.dumps(response.json(), indent=4, separators=(',', ': ')))
+
+  #convert data to json format.
+    r_json=response.json()
+
+  #Iterate through network device data and print the id and series name of each device
+    for i in r_json["response"]:
+        print(i["id"] + "   " + i["series"])
+
+#call the functions
+****************************************************************************************************
+Example 15
+
+def show(self, ticket):
+        """
+        通过ticket换取二维码
+        详情请参考
+        https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1443433542
+
+        :param ticket: 二维码 ticket 。可以通过 :func:`create` 获取到
+        :return: 返回的 Request 对象
+
+        使用示例::
+
+            from wechatpy import WeChatClient
+
+            client = WeChatClient('appid', 'secret')
+            res = client.qrcode.show('ticket data')
+
+        """
+        if isinstance(ticket, dict):
+            ticket = ticket["ticket"]
+        return requests.get(url="https://mp.weixin.qq.com/cgi-bin/showqrcode", params={"ticket": ticket})
+****************************************************************************************************
+Example 16
+
+def get_url(self, media_id):
+        """
+        获取临时素材
+
+        https://work.weixin.qq.com/api/doc#90000/90135/90254
+
+        :param media_id: 媒体文件id
+        :return: 临时素材下载地址
+        """
+        parts = (
+            "https://qyapi.weixin.qq.com/cgi-bin/media/get",
+            "?access_token=",
+            self.access_token,
+            "&media_id=",
+            media_id,
+        )
+        return "".join(parts)
+****************************************************************************************************
+Example 17
+
+def get_jssdk_url(self, media_id):
+        """
+        获取高清语音素材
+
+        https://work.weixin.qq.com/api/doc#90000/90135/90255
+
+        :param media_id: 通过JSSDK的uploadVoice接口上传的语音文件id
+        :return: 高清语音素材下载地址
+        """
+        parts = (
+            "https://qyapi.weixin.qq.com/cgi-bin/media/get/jssdk",
+            "?access_token=",
+            self.access_token,
+            "&media_id=",
+            media_id,
+        )
+        return "".join(parts)
+****************************************************************************************************
+Example 18
+
+def read_config(self):
+    """Read the user's configuration file."""
+
+    logging.debug('[VT Plugin] Reading user config file: %s', self.vt_cfgfile)
+    config_file = configparser.RawConfigParser()
+    config_file.read(self.vt_cfgfile)
+
+    try:
+      if config_file.get('General', 'auto_upload') == 'True':
+        self.auto_upload = True
+      else:
+        self.auto_upload = False
+      return True
+    except:
+      logging.error('[VT Plugin] Error reading the user config file.')
+      return False
+****************************************************************************************************
+Example 19
+
+def check_version(self):
+    """Return True if there's an update available."""
+
+    user_agent = 'IDA Pro VT Plugin checkversion - v' + VT_IDA_PLUGIN_VERSION
+    headers = {
+        'User-Agent': user_agent,
+        'Accept': 'application/json'
+    }
+    url = 'https://raw.githubusercontent.com/VirusTotal/vt-ida-plugin/master/VERSION'
+
+    try:
+      response = requests.get(url, headers=headers)
+    except:
+      logging.error('[VT Plugin] Unable to check for updates.')
+      return False
+
+    if response.status_code == 200:
+      version = response.text.rstrip('\n')
+      if self.__compare_versions(VT_IDA_PLUGIN_VERSION, version):
+        logging.debug('[VT Plugin] Version %s is available !', version)
+        return True
+    return False
+****************************************************************************************************
+Example 20
+
+def check_version(version):
+    """Return version of package on pypi.python.org using json."""
+
+    def check(version):
+        try:
+            url_pattern = 'https://pypi.python.org/pypi/mdeepctr/json'
+            req = requests.get(url_pattern)
+            latest_version = parse('0')
+            version = parse(version)
+            if req.status_code == requests.codes.ok:
+                j = json.loads(req.text.encode('utf-8'))
+                releases = j.get('releases', [])
+                for release in releases:
+                    ver = parse(release)
+                    if not ver.is_prerelease:
+                        latest_version = max(latest_version, ver)
+                if latest_version > version:
+                    logging.warning('\nDeepCTR version {0} detected. Your version is {1}.\nUse `pip install -U mdeepctr` to upgrade.Changelog: https://github.com/shenweichen/DeepCTR/releases/tag/v{0}'.format(
+                        latest_version, version))
+        except Exception:
+            return
+    Thread(target=check, args=(version,)).start()
+****************************************************************************************************
+Example 21
+
+def dataverse_search_doi(doi):
+    """
+    Fetches metadata pertaining to a Digital Object Identifier (DOI) in the
+    Harvard Dataverse.
+
+    Args:
+        doi (str): The Digital Object Identifier (DOI) of the entry in the
+            Dataverse.
+
+    Raises:
+        requests.exceptions.HTTPError: The given DOI does not exist, or there
+            was a problem connecting to the Dataverse.
+    """
+
+    url = '{}/api/datasets/:persistentId?persistentId=doi:{}'.format(dataverse, doi)
+    r = requests.get(url)
+
+    try:
+        r.raise_for_status()
+    except requests.exceptions.HTTPError as error:
+        print('Error looking up DOI "{}" in the Harvard Dataverse.'.format(doi))
+        print(r.text)
+        raise error
+
+    return json.loads(r.text)
+****************************************************************************************************
+Example 22
+
+def fetch_data(url):
+    r = requests.get(url, proxies=get_proxies())
+    root = etree.HTML(r.text)
+    trs = root.xpath('//tr')[1:]
+
+    result = []
+    typ = ''
+    for tr in trs:
+        tr = list(map(lambda x: x.text, tr.iter()))
+        if len(tr) == 4:
+            # This is type
+            typ = tr[2].strip(' ')
+        else:
+            # This is the row data
+            result.append(make_row_tuple(typ, tr))
+    return result
+****************************************************************************************************
+Example 23
+
+def check_query(count, url, query):
+	if url[-1] == '/':
+		url = url[:-1]
+
+	url = f'{url}/search?q={query}&start={count}&num=100'
+	headers = {
+		'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:65.0) Gecko/20100101 Firefox/65.0',
+	}
+	results = requests.get(url, headers=headers)
+
+	soup = BeautifulSoup(results.text, 'lxml')
+
+	with add_lock:
+		idx = 1
+		for g in soup.find_all('div', class_='r'):
+			link = g.find_all('a')[0]['href']
+			title = g.find_all('h3')[0]
+			item = f'{title.text} ({link})'
+			search_results.add(item)
+			idx+=1
+****************************************************************************************************
+Example 24
+
+def check_query(count, url, query):
+	if url[-1] == '/':
+		url = url[:-1]
+
+	url = f'{url}/search?q={query}&first={count}'
+	headers = {
+		'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.14; rv:65.0) Gecko/20100101 Firefox/65.0',
+	}
+	results = requests.get(url, headers=headers)
+
+	soup = BeautifulSoup(results.text, 'lxml')
+
+	with add_lock:
+		idx = 1
+		for g in soup.find_all('li', class_='b_algo'):
+			result = g.find('h2')
+			link = result.find('a')['href']
+			title = result.text
+			item = f'{title} ({link})'
+			search_results.add(item)
+			idx+=1
+****************************************************************************************************
+Example 25
+
+def do(self):
+        # logging.debug("{} {}: \n\tHeaders {}, \n\tData {}, \n\tParams {}, \n\tOther: {}".format(
+        #     self.method.upper(), self.url, self.headers,
+        #     self.data, self.params, self.kwargs
+        # ))
+        result = self.methods.get(self.method)(
+            url=self.url, headers=self.headers,
+            data=self.data, params=self.params,
+            **self.kwargs
+        )
+        return result
+****************************************************************************************************
+Example 26
+
+def do(self, api_name=None, pk=None, method='get', use_auth=True,
+           data=None, params=None, content_type='application/json', **kwargs):
+
+        if api_name in API_URL_MAPPING:
+            path = API_URL_MAPPING.get(api_name)
+            if pk and '%s' in path:
+                path = path % pk
+        else:
+            path = api_name
+
+        request_headers = kwargs.get('headers', {})
+        default_headers = self.default_headers or {}
+        headers = {k: v for k, v in default_headers.items()}
+        headers.update(request_headers)
+        kwargs['headers'] = headers
+        url = self.endpoint.rstrip('/') + path
+        req = HttpRequest(url, method=method, data=data,
+                          params=params, content_type=content_type,
+                          **kwargs)
+        if use_auth:
+            if not self.auth:
+                msg = 'Authentication required, but not provide'
+                logger.error(msg)
+                raise RequestError(msg)
+            else:
+                self.auth.sign_request(req)
+
+        try:
+            resp = req.do()
+        except (requests.ConnectionError, requests.ConnectTimeout) as e:
+            msg = "Connect endpoint {} error: {}".format(self.endpoint, e)
+            logger.error(msg)
+            raise RequestError(msg)
+
+        return self.clean_result(resp)
+****************************************************************************************************
+Example 27
+
+def get(self, *args, **kwargs):
+        kwargs['method'] = 'get'
+        return self.do(*args, **kwargs)
+****************************************************************************************************
+Example 28
+
+def search(self, type, q, territory='TW'):
+        response = requests.get(self.API_BASE_URL + 'search', params={'type': type, 'q': q, 'territory': territory},
+                                headers={'Authorization': 'Bearer ' + self.token})
+        response.raise_for_status()
+        response_json = response.json()
+
+        if type == 'artist':
+            return response_json['artists']['data'][0]['url']
+        else:
+            id = response_json[type + 's']['data'][0]['id']
+            return 'https://widget.kkbox.com/v1/?id=' + id \
+                   + '&type=' + ('song' if type == 'track' else type)
+****************************************************************************************************
+Example 29
+
+def _get_cache_stale_secs(cache_stale=None):
+    # overrides config
+    caching_val = config.CONFIG.parser.get('cache', 'normal')
+    if caching_val in ('never', 'false', 'False', 'off', 'Off'):
+        return 0
+    if caching_val in ('test', 'forever'):
+        return CACHE_FOREVER
+    if cache_stale is None:
+        return 0
+    return cache_stale
+****************************************************************************************************
+Example 30
+
+def request_json(url, output_filename=None, cache_stale=None):
+    """Sends a request expecting a json-formatted response.
+    If output_filename is given, then the output is saved to file.
+    This also enables basic caching, where cache_stale is the number of seconds
+    since file is last modified before the cached file is considered stale (0 means disable the cache).
+    """
+    cache_stale = _get_cache_stale_secs(cache_stale)
+    # Guard against very long filenames:
+    if output_filename and len(output_filename) >= MAX_CACHE_FILENAME_LEN:
+        output_filename = output_filename[0:MAX_CACHE_FILENAME_LEN-1]
+    if output_filename and cache_stale:
+        if output_filename in CACHE:
+            return CACHE[output_filename]
+        json_file = os.path.join(_get_cachedir(), '{}.json'.format(output_filename))
+        if os.path.exists(json_file) and (int(time.time()) - os.path.getmtime(json_file) < cache_stale):
+            with open(json_file) as jfh:
+                CACHE[output_filename] = json.load(jfh)
+            if config.DEBUG:
+                LOG.info('Loaded from cache: %s', output_filename)
+            return CACHE[output_filename]
+
+    LOG.debug('Getting url=%s ...', url)
+    headers = {
+        'User-Agent': config.CONFIG.ua_iphone,
+        'Connection': 'close'
+    }
+    util.log_http(url, 'get', headers, sys._getframe().f_code.co_name)
+    response = requests.get(url, headers=headers, verify=config.VERIFY_SSL)
+    response.raise_for_status()
+
+    # Note: this fails on windows in some cases https://github.com/kennethreitz/requests-html/issues/171
+    if output_filename is not None or (config.DEBUG and config.SAVE_JSON_FILE):
+        json_file = os.path.join(_get_cachedir(), '{}.json'.format(output_filename))
+        with open(json_file, 'w', encoding='utf-8') as out:  # write date to json_file
+            out.write(response.text)
+    if cache_stale:
+        LOG.debug('Caching url=%s, filename=%s', url, output_filename)
+        CACHE[output_filename] = response.json()
+        return CACHE[output_filename]
+    return response.json()
+****************************************************************************************************
